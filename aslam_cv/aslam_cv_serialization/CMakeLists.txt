@@ -15,7 +15,7 @@ cs_add_library(${PROJECT_NAME}
   src/FrameBaseSerialization.cpp
 )
 
-find_package(Boost REQUIRED COMPONENTS serialization system)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS serialization system)
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 

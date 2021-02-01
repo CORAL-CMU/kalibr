@@ -3,7 +3,7 @@ project(bar)
 
 find_package(catkin_simple REQUIRED)
 
-find_package(Boost REQUIRED COMPONENTS thread system)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS thread system)
 
 include_directories(${Boost_INCLUDE_DIRS})
 

@@ -3,7 +3,7 @@ project(numpy_eigen)
 
 find_package(catkin REQUIRED COMPONENTS cmake_modules python_module)
 include_directories(${catkin_INCLUDE_DIRS})
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system)
 find_package(Eigen REQUIRED)
 
 catkin_python_setup()

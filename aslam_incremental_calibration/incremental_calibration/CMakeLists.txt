@@ -40,7 +40,7 @@ cs_add_library(${PROJECT_NAME}
   src/algorithms/linalg.cpp
 )
 
-find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system thread)
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
