@@ -7,7 +7,7 @@ catkin_simple()
 
 ADD_DEFINITIONS(-DASLAM_USE_ROS )
 
-find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system serialization filesystem)
 
 include_directories(${Boost_INCLUDE_DIRS})
 

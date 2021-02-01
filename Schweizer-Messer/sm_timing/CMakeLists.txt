@@ -3,7 +3,7 @@ project(sm_timing)
 
 find_package(catkin REQUIRED COMPONENTS sm_common sm_random)
 include_directories(${catkin_INCLUDE_DIRS})
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system)
 
 catkin_package(
   INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}

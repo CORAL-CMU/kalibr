@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(aslam_cv_backend)
 
 find_package(catkin_simple REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system)
 
 include_directories(${Boost_INCLUDE_DIRS})
 

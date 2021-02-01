@@ -4,7 +4,7 @@ project(aslam_backend)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-find_package(Boost REQUIRED COMPONENTS system thread)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 include_directories(${Eigen_INCLUDE_DIRS})

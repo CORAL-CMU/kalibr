@@ -72,7 +72,7 @@ ${SETUP_PY_TEXT}
     SET(BOOST_COMPONENTS)
   endif()
   if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
-    find_package(Boost QUIET)
+    find_package(Boost 1.58.0 EXACT QUIET)
     if(Boost_VERSION LESS 106700)
       list(APPEND BOOST_COMPONENTS python)
     else()
@@ -88,7 +88,7 @@ ${SETUP_PY_TEXT}
   else()
     list(APPEND BOOST_COMPONENTS python3)
   endif()
-  find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+  find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS ${BOOST_COMPONENTS})
   include_directories(${Boost_INCLUDE_DIRS})
 
   IF(APPLE)

@@ -27,7 +27,7 @@ include_directories(include)
 SET(PY_PROJECT_NAME sm_python)
 SET(PY_PACKAGE_DIR python/sm)
 
-find_package(Boost REQUIRED COMPONENTS system serialization)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system serialization)
 include_directories(${Boost_INCLUDE_DIRS})
 
 ##############

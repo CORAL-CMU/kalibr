@@ -3,7 +3,7 @@ project(sm_common)
 
 find_package(catkin REQUIRED)
 include_directories(${catkin_INCLUDE_DIRS})
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++0x -D__STRICT_ANSI__")
 

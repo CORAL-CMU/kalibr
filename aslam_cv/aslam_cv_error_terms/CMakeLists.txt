@@ -4,7 +4,7 @@ project(aslam_cv_error_terms)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-find_package(Boost REQUIRED COMPONENTS system )
+find_package(Boost 1.58.0 EXACT REQUIRED COMPONENTS system )
 
 include_directories(${Boost_INCLUDE_DIRS})
 
