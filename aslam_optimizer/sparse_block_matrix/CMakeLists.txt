@@ -10,6 +10,9 @@ catkin_simple()
 find_package(Eigen3)
 include_directories(${Eigen_INCLUDE_DIRS})
 
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
+
 cs_add_library(${PROJECT_NAME} 
   src/matrix_structure.cpp
   src/sparse_helper.cpp

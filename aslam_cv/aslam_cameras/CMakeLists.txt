@@ -9,6 +9,8 @@ ADD_DEFINITIONS(-DASLAM_USE_ROS )
 
 find_package(Boost REQUIRED COMPONENTS system serialization filesystem)
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 #common commands for building c++ executables and libraries
 cs_add_library(${PROJECT_NAME} 
   src/CameraGeometryBase.cpp
@@ -46,6 +48,8 @@ if(CATKIN_ENABLE_TESTING)
     test/test_main.cpp
     test/PinholeCameraGeometry.cpp
     test/OmniCameraGeometry.cpp
+    test/ExtendedUnifiedCameraGeometry.cpp
+    test/DoubleSphereCameraGeometry.cpp
     test/RadialTangentialDistortion.cpp
     test/EquidistantDistortion.cpp
     test/FovDistortion.cpp

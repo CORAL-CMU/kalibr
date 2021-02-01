@@ -28,20 +28,26 @@ class OptimizationDiverged(Exception):
     pass
 
 class CameraGeometry(object):
-    def __init__(self, cameraModel, targetConfig, dataset, geometry=None, verbose=False):
+    def __init__(self, cameraModel, targetConfig, dataset, geometry=None, verbose=False, projectionActive=True, distortionActive=True, shutterActive=False):
         self.dataset = dataset
         
         self.model = cameraModel
         if geometry is None:
             self.geometry = cameraModel.geometry()
+            self.isGeometryInitialized = False
+        else:
+            self.geometry = geometry
+            self.isGeometryInitialized = True
         
         if not type(self.geometry) == cameraModel.geometry:
             raise RuntimeError("The type of geometry passed in \"%s\" does not match the model type \"%s\"" % (type(geometry),type(cameraModel.geometry)))
         
         #create the design variables
+        self.projectionActive = projectionActive
+        self.distortionActive = distortionActive
+        self.shutterActive = shutterActive
         self.dv = cameraModel.designVariable(self.geometry)
-        self.setDvActiveStatus(True, True, False)
-        self.isGeometryInitialized = False
+        self.setDvActiveStatus(projectionActive, distortionActive, shutterActive)
         
         #create target detector
         self.ctarget = TargetDetector(targetConfig, self.geometry, showCorners=verbose, showReproj=verbose)
@@ -174,7 +180,7 @@ class CalibrationTargetOptimizationProblem(ic.CalibrationOptimizationProblem):
         for camera in cameras:
             if not camera.isGeometryInitialized:
                 raise RuntimeError('The camera geometry is not initialized. Please initialize with initGeometry() or initGeometryFromDataset()')
-            camera.setDvActiveStatus(True, True, False)
+            camera.setDvActiveStatus(camera.projectionActive, camera.distortionActive, False)
             rval.addDesignVariable(camera.dv.distortionDesignVariable(), CALIBRATION_GROUP_ID)
             rval.addDesignVariable(camera.dv.projectionDesignVariable(), CALIBRATION_GROUP_ID)
             rval.addDesignVariable(camera.dv.shutterDesignVariable(), CALIBRATION_GROUP_ID)
@@ -271,9 +277,10 @@ class CameraCalibration(object):
         batch_problem = CalibrationTargetOptimizationProblem.fromTargetViewObservations(self.cameras, self.target, self.baselines, T_tc_guess, rig_observations, useBlakeZissermanMest=self.useBlakeZissermanMest)
         self.estimator_return_value = self.estimator.addBatch(batch_problem, force)
         
-        if self.estimator_return_value.numIterations >= self.optimizerOptions.maxIterations:
-            sm.logError("Did not converge in maxIterations... restarting...")
-            raise OptimizationDiverged
+        # if self.estimator_return_value.numIterations >= self.optimizerOptions.maxIterations:
+        #     sm.logError("Did not converge in maxIterations... restarting...")
+            # raise OptimizationDiverged
+            # return False
         
         success = self.estimator_return_value.batchAccepted
         if success:
@@ -598,8 +605,11 @@ def printParameters(cself, dest=sys.stdout):
         corners, reprojs, rerrs = getReprojectionErrors(cself, cidx)        
         if len(rerrs)>0:
             me, se = getReprojectionErrorStatistics(rerrs)
-            print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
-        print >> dest
+            try:
+              print >> dest, "\t reprojection error: [%f, %f] +- [%f, %f]" % (me[0], me[1], se[0], se[1])
+            except:
+              print >> dest, "\t Failed printing the reprojection error."
+            print >> dest
 
     #print baselines
     for bidx, baseline in enumerate(cself.baselines):
@@ -656,11 +666,17 @@ def saveChainParametersYaml(cself, resultFile, graph):
     cameraModels = {acvb.DistortedPinhole: 'pinhole',
                     acvb.EquidistantPinhole: 'pinhole',
                     acvb.FovPinhole: 'pinhole',
-                    acvb.DistortedOmni: 'omni'}
+                    acvb.Omni: 'omni',
+                    acvb.DistortedOmni: 'omni',
+                    acvb.ExtendedUnified: 'eucm',
+                    acvb.DoubleSphere: 'ds'}
     distortionModels = {acvb.DistortedPinhole: 'radtan',
                         acvb.EquidistantPinhole: 'equidistant',
                         acvb.FovPinhole: 'fov',
-                        acvb.DistortedOmni: 'radtan'}
+                        acvb.Omni: 'none',
+                        acvb.DistortedOmni: 'radtan',
+                        acvb.ExtendedUnified: 'none',
+                        acvb.DoubleSphere: 'none'}
 
     chain = cr.CameraChainParameters(resultFile, createYaml=True)
     for cam_id, cam in enumerate(cself.cameras):
@@ -677,6 +693,12 @@ def saveChainParametersYaml(cself, resultFile, graph):
             camParams.setIntrinsics(cameraModel, [P.xi(), P.fu(), P.fv(), P.cu(), P.cv()] )
         elif cameraModel == 'pinhole':
             camParams.setIntrinsics(cameraModel, [P.fu(), P.fv(), P.cu(), P.cv()] )
+        elif cameraModel == 'eucm':
+            camParams.setIntrinsics(cameraModel, [P.alpha(), P.beta(), P.fu(), P.fv(), P.cu(), P.cv()] )
+        elif cameraModel == 'ds':
+            camParams.setIntrinsics(cameraModel, [P.xi(), P.alpha(), P.fu(), P.fv(), P.cu(), P.cv()] )
+        else:
+            raise RuntimeError("Invalid camera model {}.".format(cameraModel))
         camParams.setResolution( [P.ru(), P.rv()] )
         dist_coeffs = P.distortion().getParameters().flatten(1)
         camParams.setDistortion( distortionModel, dist_coeffs)

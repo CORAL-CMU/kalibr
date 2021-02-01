@@ -41,6 +41,7 @@ cs_add_library(${PROJECT_NAME}
 )
 
 find_package(Boost REQUIRED COMPONENTS system thread)
+include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES} ${TBB_LIBRARIES})
 
 if(CATKIN_ENABLE_TESTING)

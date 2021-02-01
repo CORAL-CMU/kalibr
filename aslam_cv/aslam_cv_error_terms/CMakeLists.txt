@@ -6,6 +6,8 @@ catkin_simple()
 
 find_package(Boost REQUIRED COMPONENTS system )
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 if(CATKIN_ENABLE_TESTING)
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257

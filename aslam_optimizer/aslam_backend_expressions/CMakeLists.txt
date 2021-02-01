@@ -12,6 +12,7 @@ catkin_simple()
 include_directories(${EIGEN_INCLUDE_DIRS})
 
 find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
 
 cs_add_library(${PROJECT_NAME}
   src/RotationExpression.cpp

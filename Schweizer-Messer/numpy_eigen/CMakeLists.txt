@@ -11,6 +11,7 @@ catkin_python_setup()
 add_definitions(${EIGEN_DEFINITIONS})
 include_directories(include ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 include_directories("${PROJECT_SOURCE_DIR}/include/numpy_eigen")
+include_directories(${Boost_INCLUDE_DIRS})
 
 catkin_package(
   INCLUDE_DIRS include  ${catkin_INCLUDE_DIRS}

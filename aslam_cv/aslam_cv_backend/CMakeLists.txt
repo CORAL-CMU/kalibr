@@ -4,6 +4,8 @@ project(aslam_cv_backend)
 find_package(catkin_simple REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 catkin_simple()
 
 cs_add_library(${PROJECT_NAME}

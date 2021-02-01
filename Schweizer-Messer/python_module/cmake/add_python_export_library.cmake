@@ -67,11 +67,29 @@ ${SETUP_PY_TEXT}
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
 
   if(APPLE)
-    SET(BOOST_COMPONENTS python system)
+    SET(BOOST_COMPONENTS system)
   else()
-    SET(BOOST_COMPONENTS python)
+    SET(BOOST_COMPONENTS)
   endif()
-  find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS}) 
+  if(PYTHONLIBS_VERSION_STRING VERSION_LESS 3)
+    find_package(Boost QUIET)
+    if(Boost_VERSION LESS 106700)
+      list(APPEND BOOST_COMPONENTS python)
+    else()
+      # The boost_python library has been renamed in Boost 1.67 and the FindBoost.cmake
+      # module requires a Python version suffix:
+      #
+      # References:
+      # - https://www.boost.org/docs/libs/1_67_0/libs/python/doc/html/rn.html
+      # - https://cmake.org/cmake/help/v3.12/module/FindBoost.html
+      #
+      list(APPEND BOOST_COMPONENTS python27)
+    endif()
+  else()
+    list(APPEND BOOST_COMPONENTS python3)
+  endif()
+  find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+  include_directories(${Boost_INCLUDE_DIRS})
 
   IF(APPLE)
     # The apple framework headers don't include the numpy headers for some reason.

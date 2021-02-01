@@ -4,6 +4,9 @@ project(sm_random)
 find_package(catkin REQUIRED)
 include_directories(${catkin_INCLUDE_DIRS})
 
+find_package(Boost REQUIRED COMPONENTS system)
+include_directories(${Boost_INCLUDE_DIRS})
+
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}

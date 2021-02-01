@@ -15,6 +15,7 @@ cs_add_library(${PROJECT_NAME}
   )
 
 find_package(Boost REQUIRED COMPONENTS serialization system) 
+include_directories(${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS} ${Boost_LIBRARIES})
 

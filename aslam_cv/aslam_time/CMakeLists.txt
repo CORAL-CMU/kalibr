@@ -6,6 +6,8 @@ catkin_simple()
 
 find_package(Boost REQUIRED COMPONENTS system)
 
+include_directories(${Boost_INCLUDE_DIRS})
+
 cs_add_library(${PROJECT_NAME}
     src/time.cpp
     src/duration.cpp)

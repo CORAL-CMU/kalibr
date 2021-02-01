@@ -16,6 +16,7 @@ cs_add_library(${PROJECT_NAME}
 )
 
 find_package(Boost REQUIRED COMPONENTS serialization system)
+include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 # Avoid clash with tr1::tuple: https://code.google.com/p/googletest/source/browse/trunk/README?r=589#257
