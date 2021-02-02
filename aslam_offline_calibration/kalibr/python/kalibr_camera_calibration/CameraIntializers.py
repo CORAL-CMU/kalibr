@@ -70,8 +70,8 @@ def stereoCalibrate(camL_geometry, camH_geometry, obslist, distortionActive=Fals
         target_pose_dvs.append(target_pose_dv)
     
     #add camera dvs
-    camL_geometry.setDvActiveStatus(camL_geometry.projectiveActive, distortionActive or camL_geometry.distortionActive, False)
-    camH_geometry.setDvActiveStatus(camH_geometry.projectiveActive, distortionActive or camH_geometry.distortionActive, False)
+    camL_geometry.setDvActiveStatus(camL_geometry.projectionActive, distortionActive or camL_geometry.distortionActive, False)
+    camH_geometry.setDvActiveStatus(camH_geometry.projectionActive, distortionActive or camH_geometry.distortionActive, False)
     problem.addDesignVariable(camL_geometry.dv.distortionDesignVariable())
     problem.addDesignVariable(camL_geometry.dv.projectionDesignVariable())
     problem.addDesignVariable(camL_geometry.dv.shutterDesignVariable())
