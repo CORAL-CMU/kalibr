@@ -316,7 +316,9 @@ def main():
                 #add new batch problem
                 obs_tuple = obsdb.getAllObsAtTimestamp(timestamp)
 
-                if (not (parsed.fixed_projection and parsed.fixed_distortion)) or len(obs_tuple) > 1:
+                if (parsed.fixed_projection and parsed.fixed_distortion) and len(obs_tuple) <= 1:
+                    progress.sample()
+                else:
                     est_baselines = list()
                     for bidx, baseline in enumerate(calibrator.baselines):
                         est_baselines.append( sm.Transformation(baseline.T()) )
