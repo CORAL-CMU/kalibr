@@ -115,6 +115,7 @@ def parseArgs():
     coralSettings = parser.add_argument_group('CORAL options')
     coralSettings.add_argument('--output-folder', dest='output_folder', help='Output folder')
     coralSettings.add_argument('--dump-folder', dest='dump_folder', help='Dump folder')
+    coralSettings.add_argument('--dump-protocol', type=float, default=2.0, dest='dump_protocol', help='Pickle dump protocol')
     coralSettings.add_argument('--overwrite-dump', action='store_true', dest='overwrite_dump', help='Overwrite dump')
     coralSettings.add_argument('--fixed-projection', action='store_true', dest='fixed_projection', help='Fixed projection')
     coralSettings.add_argument('--fixed-distortion', action='store_true', dest='fixed_distortion', help='Fixed distortion')
@@ -221,7 +222,7 @@ def main():
                 if parsed.dump_folder and cam_observations_dump_file:
                     print("dump observations")
                     start = time.time()
-                    cPickle.dump(observations, open(cam_observations_dump_file, "wb"), protocol=-1)
+                    cPickle.dump(observations, open(cam_observations_dump_file, "wb"), protocol=parsed.dump_protocol)
                     end = time.time()
                     print("time cost = {0}".format(end - start))
             
@@ -453,7 +454,7 @@ def main():
 
                     if parsed.overwrite_dump or (not os.path.exists(cam_geometry_dum_file)):
                         print("dump geometry")
-                        cPickle.dump(cam.geometry, open(cam_geometry_dum_file, "wb"), protocol=-1)
+                        cPickle.dump(cam.geometry, open(cam_geometry_dum_file, "wb"), protocol=parsed.dump_protocol)
 
             #final output
             print
