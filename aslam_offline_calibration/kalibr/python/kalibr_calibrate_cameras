@@ -236,7 +236,7 @@ def main():
                     if parsed.dump_folder and cam_observations_dump_file:
                         print("dump observations")
                         start = time.time()
-                        cPickle.dump(observations, open(cam_observations_dump_file, "wb"), protocol=parsed.dump_protocol)
+                        cPickle.dump(observations, open(cam_observations_dump_file, "wb"), protocol=-1)
                         end = time.time()
                         print("time cost = {0}".format(end - start))
 
