@@ -115,7 +115,8 @@ def parseArgs():
     coralSettings = parser.add_argument_group('CORAL options')
     coralSettings.add_argument('--output-folder', dest='output_folder', help='Output folder')
     coralSettings.add_argument('--dump-folder', dest='dump_folder', help='Dump folder')
-    coralSettings.add_argument('--dump-protocol', type=float, default=2.0, dest='dump_protocol', help='Pickle dump protocol')
+    coralSettings.add_argument('--dump-protocol', type=int, default=2, dest='dump_protocol', help='Pickle dump protocol')
+    coralSettings.add_argument('--resave-geometry-dump', action='store_true', dest='resave_geometry_dump', help='Resave geometry dump only')
     coralSettings.add_argument('--overwrite-dump', action='store_true', dest='overwrite_dump', help='Overwrite dump')
     coralSettings.add_argument('--fixed-projection', action='store_true', dest='fixed_projection', help='Fixed projection')
     coralSettings.add_argument('--fixed-distortion', action='store_true', dest='fixed_distortion', help='Fixed distortion')
@@ -179,73 +180,89 @@ def main():
         print "Initializing cam{0}:".format(cam_id)
         print "\tCamera model:\t  {0}".format(modelName)
 
-        if modelName in cameraModels:
-            #open dataset 
-            dataset = initBagDataset(parsed.bagfile, topic, parsed.bag_from_to)
-        
-            #create camera
-            cameraModel = cameraModels[modelName]
-
+        if parsed.resave_geometry_dump:
             cam_geometry_dum_file = ""
             if parsed.dump_folder:
                 cam_geometry_dum_file = os.path.basename(parsed.bagfile).rstrip(".bag") + "_" + topic + "_" + modelName + "_geometry.dump"
                 cam_geometry_dum_file = os.path.join(parsed.dump_folder, cam_geometry_dum_file)
                 print("cam_geometry_dum_file = {0}".format(cam_geometry_dum_file))
 
-            geometry = None
             if parsed.dump_folder and cam_geometry_dum_file and os.path.exists(cam_geometry_dum_file):
                 print("load geometry from dump")
                 geometry = cPickle.load(open(cam_geometry_dum_file, "rb"))
+                print("dump geometry")
+                cPickle.dump(geometry, open(cam_geometry_dum_file, "wb"), protocol=parsed.dump_protocol)
+        else:
+            if modelName in cameraModels:
+                #open dataset
+                dataset = initBagDataset(parsed.bagfile, topic, parsed.bag_from_to)
 
-            cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset, geometry, verbose=(parsed.verbose or parsed.showextraction),
-                                     projectionActive=(not parsed.fixed_projection),
-                                     distortionActive=(not parsed.fixed_distortion))
-            print("cam.projectionActive = {0}, cam.distortionActive = {1}".format(cam.projectionActive, cam.distortionActive))
-                
-            #extract the targets
-            cam_observations_dump_file = ""
-            if parsed.dump_folder:
-                cam_observations_dump_file = os.path.basename(parsed.bagfile).rstrip(".bag") + "_" + topic + "_observations.dump"
-                cam_observations_dump_file = os.path.join(parsed.dump_folder, cam_observations_dump_file)
-                print("cam_observations_dump_file = {0}".format(cam_observations_dump_file))
+                #create camera
+                cameraModel = cameraModels[modelName]
 
-            if parsed.dump_folder and cam_observations_dump_file and os.path.exists(cam_observations_dump_file):
-                print("load observations from dump")
-                start = time.time()
-                observations = cPickle.load(open(cam_observations_dump_file, "rb"))
-                end = time.time()
-                print("time cost = {0}".format(end - start))
+                cam_geometry_dum_file = ""
+                if parsed.dump_folder:
+                    cam_geometry_dum_file = os.path.basename(parsed.bagfile).rstrip(".bag") + "_" + topic + "_" + modelName + "_geometry.dump"
+                    cam_geometry_dum_file = os.path.join(parsed.dump_folder, cam_geometry_dum_file)
+                    print("cam_geometry_dum_file = {0}".format(cam_geometry_dum_file))
 
-            else:
-                multithreading = not (parsed.verbose or parsed.showextraction)
-                observations = kc.extractCornersFromDataset(cam.dataset, cam.ctarget.detector, multithreading=multithreading, clearImages=False, noTransformation=True)
-                if parsed.dump_folder and cam_observations_dump_file:
-                    print("dump observations")
+                geometry = None
+                if parsed.dump_folder and cam_geometry_dum_file and os.path.exists(cam_geometry_dum_file):
+                    print("load geometry from dump")
+                    geometry = cPickle.load(open(cam_geometry_dum_file, "rb"))
+
+                cam = kcc.CameraGeometry(cameraModel, targetConfig, dataset, geometry, verbose=(parsed.verbose or parsed.showextraction),
+                                         projectionActive=(not parsed.fixed_projection),
+                                         distortionActive=(not parsed.fixed_distortion))
+                print("cam.projectionActive = {0}, cam.distortionActive = {1}".format(cam.projectionActive, cam.distortionActive))
+
+                #extract the targets
+                cam_observations_dump_file = ""
+                if parsed.dump_folder:
+                    cam_observations_dump_file = os.path.basename(parsed.bagfile).rstrip(".bag") + "_" + topic + "_observations.dump"
+                    cam_observations_dump_file = os.path.join(parsed.dump_folder, cam_observations_dump_file)
+                    print("cam_observations_dump_file = {0}".format(cam_observations_dump_file))
+
+                if parsed.dump_folder and cam_observations_dump_file and os.path.exists(cam_observations_dump_file):
+                    print("load observations from dump")
                     start = time.time()
-                    cPickle.dump(observations, open(cam_observations_dump_file, "wb"), protocol=parsed.dump_protocol)
+                    observations = cPickle.load(open(cam_observations_dump_file, "rb"))
                     end = time.time()
                     print("time cost = {0}".format(end - start))
-            
-            #populate the database
-            for obs in observations:
-                obsdb.addObservation(cam_id, obs)
 
-            #initialize the intrinsics
-            if not geometry:
-                print("initGeometryFromObservations")
-                if not cam.initGeometryFromObservations(observations):
-                    raise RuntimeError("Could not initialize the intrinsics for camera with topic: {0}. Try to use --verbose and check whether the calibration target extraction is successful.".format(topic))
-            
-            print "\tProjection initialized to: %s" % cam.geometry.projection().getParameters().flatten()
-            print "\tDistortion initialized to: %s" % cam.geometry.projection().distortion().getParameters().flatten()
-            
-            cameraList.append(cam)
-        else:
-            raise RuntimeError( "Unknown camera model: {0}. Try {1}.".format(modelName, cameraModels.keys()) )
+                else:
+                    multithreading = not (parsed.verbose or parsed.showextraction)
+                    observations = kc.extractCornersFromDataset(cam.dataset, cam.ctarget.detector, multithreading=multithreading, clearImages=False, noTransformation=True)
+                    if parsed.dump_folder and cam_observations_dump_file:
+                        print("dump observations")
+                        start = time.time()
+                        cPickle.dump(observations, open(cam_observations_dump_file, "wb"), protocol=parsed.dump_protocol)
+                        end = time.time()
+                        print("time cost = {0}".format(end - start))
+
+                #populate the database
+                for obs in observations:
+                    obsdb.addObservation(cam_id, obs)
+
+                #initialize the intrinsics
+                if not geometry:
+                    print("initGeometryFromObservations")
+                    if not cam.initGeometryFromObservations(observations):
+                        raise RuntimeError("Could not initialize the intrinsics for camera with topic: {0}. Try to use --verbose and check whether the calibration target extraction is successful.".format(topic))
+
+                print "\tProjection initialized to: %s" % cam.geometry.projection().getParameters().flatten()
+                print "\tDistortion initialized to: %s" % cam.geometry.projection().distortion().getParameters().flatten()
+
+                cameraList.append(cam)
+            else:
+                raise RuntimeError( "Unknown camera model: {0}. Try {1}.".format(modelName, cameraModels.keys()) )
         
     if parsed.verbose:
         obsdb.printTable()
-    
+
+    if parsed.resave_geometry_dump:
+        exit()
+
     #initialize the calibration graph
     graph = kcc.MulticamCalibrationGraph(obsdb)
     
